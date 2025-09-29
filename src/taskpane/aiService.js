@@ -1,8 +1,11 @@
+// aiService.js
+
 // Import Gemini API
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // AIService - Handles Gemini AI integration, prompts, and conversation management
-class AIService {
+// <--- Add 'export' DIRECTLY to the ONLY class definition in this file ---
+export class AIService {
     constructor() {
         this.CONFIG = {
             // Get API key from environment variable
@@ -10,7 +13,7 @@ class AIService {
             GEMINI_MODEL: 'gemini-2.5-flash',
             MAX_HISTORY: 10
         };
-        
+
         this.genAI = null;
         this.model = null;
         this.conversationHistory = [];
@@ -20,16 +23,16 @@ class AIService {
     // Initialize Gemini AI with chat session
     initializeGemini() {
         try {
-            if (!this.CONFIG.GEMINI_API_KEY || this.CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+            if (!this.CONFIG.GEMINI_API_KEY || this.CONFIG.GEMINI_API_KEY === '') { // Changed 'YOUR_GEMINI_API_KEY_HERE' to '' for clarity
                 throw new Error('Please configure your Gemini API key in the .env file');
             }
-            
+
             this.genAI = new GoogleGenerativeAI(this.CONFIG.GEMINI_API_KEY);
             this.model = this.genAI.getGenerativeModel({ model: this.CONFIG.GEMINI_MODEL });
-            
+
             this.conversationHistory = [];
             this.chatSession = null;
-            
+
             console.log('Gemini AI initialized with model:', this.CONFIG.GEMINI_MODEL);
             return true;
         } catch (error) {
@@ -43,11 +46,11 @@ class AIService {
         if (!this.model) {
             throw new Error('Gemini AI not initialized');
         }
-        
+
         if (!currentWorksheetData) {
             throw new Error('No Excel data available');
         }
-        
+
         try {
             if (!this.chatSession) {
                 const systemPrompt = this.createEnhancedSystemPrompt();
@@ -58,30 +61,30 @@ class AIService {
                         temperature: 0.7,
                     }
                 });
-                
+
                 await this.chatSession.sendMessage(systemPrompt);
             }
-            
+
             const contextualPrompt = this.createEnhancedContextualPrompt(userQuestion, currentWorksheetData);
-            
+
             const result = await this.chatSession.sendMessage(contextualPrompt);
             const response = await result.response;
             const text = response.text();
-            
+
             if (!text || text.trim().length === 0) {
                 throw new Error('Empty response from AI');
             }
-            
+
             return text.trim();
-            
+
         } catch (error) {
             console.error('Gemini API error:', error);
-            
+
             if (error.message.includes('chat') || error.message.includes('session')) {
                 this.chatSession = null;
                 throw new Error('Chat session reset. Please try your question again.');
             }
-            
+
             if (error.message.includes('API key')) {
                 throw new Error('Invalid API key. Please check your Gemini API configuration.');
             } else if (error.message.includes('quota') || error.message.includes('limit')) {
@@ -121,7 +124,7 @@ Respond with "Enhanced analysis ready!" to confirm.`;
     // Enhanced contextual prompt
     createEnhancedContextualPrompt(userQuestion, currentWorksheetData) {
         const data = currentWorksheetData;
-        
+
         let prompt = `ENHANCED EXCEL DATA ANALYSIS:
 Worksheet: ${data.worksheetName}
 Range: ${data.address} (${data.totalRows} rows × ${data.totalCols} columns)
@@ -131,7 +134,7 @@ Range: ${data.address} (${data.totalRows} rows × ${data.totalCols} columns)
         // Add structured data analysis
         if (data.structuredData) {
             const struct = data.structuredData;
-            
+
             prompt += `TABLE STRUCTURE:
 - Type: ${struct.type}
 - Column Headers: ${struct.columnHeaders.filter(h => h && h !== '').join(' | ')}
@@ -153,7 +156,7 @@ Range: ${data.address} (${data.totalRows} rows × ${data.totalCols} columns)
                 });
                 prompt += '\n';
             }
-            
+
             // Add key rows with their values
             if (struct.keyRows.length > 0) {
                 prompt += `KEY FINANCIAL ROWS:\n`;
@@ -166,7 +169,7 @@ Range: ${data.address} (${data.totalRows} rows × ${data.totalCols} columns)
                 });
                 prompt += '\n';
             }
-            
+
             // Add sample of other data rows
             if (struct.dataRows.length > struct.keyRows.length) {
                 prompt += `OTHER DATA ROWS (sample):\n`;
@@ -181,7 +184,7 @@ Range: ${data.address} (${data.totalRows} rows × ${data.totalCols} columns)
                 prompt += '\n';
             }
         }
-        
+
         // Add conversation context
         if (this.conversationHistory.length > 2) {
             prompt += `RECENT CONVERSATION:\n`;
@@ -196,7 +199,7 @@ Range: ${data.address} (${data.totalRows} rows × ${data.totalCols} columns)
             });
             prompt += '\n';
         }
-        
+
         prompt += `CURRENT USER QUESTION: "${userQuestion}"
 
 IMPORTANT INSTRUCTIONS:
@@ -219,7 +222,7 @@ Please provide a detailed analysis based on this enhanced data structure.`;
             content: content,
             timestamp: new Date().toISOString()
         });
-        
+
         // Trim history if it gets too long
         if (this.conversationHistory.length > this.CONFIG.MAX_HISTORY * 2) {
             this.conversationHistory = this.conversationHistory.slice(-this.CONFIG.MAX_HISTORY * 2);
@@ -249,7 +252,7 @@ Please provide a detailed analysis based on this enhanced data structure.`;
     }
 }
 
-// Export for use in other modules
-if (typeof window !== 'undefined') {
-    window.AIService = AIService;
-}
+// <--- REMOVE THIS BLOCK COMPLETELY (it causes duplicate declaration and is for global scope) --->
+// if (typeof window !== 'undefined') {
+//     window.AIService = AIService;
+// }

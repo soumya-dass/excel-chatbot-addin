@@ -1,5 +1,7 @@
 /* global console, Excel, Office */
 
+import './taskpane.css'; // Import CSS directly into JS
+
 // Import the services directly (for Webpack bundling)
 import './dataService.js';
 import './aiService.js';
@@ -24,24 +26,12 @@ Office.onReady((info) => {
 // Initialize all services and set up the application
 function initializeServices() {
     try {
-        // Initialize services
-        dataService = new window.DataService();
-        aiService = new window.AIService();
-        uiService = new window.UIService();
+        // Now you instantiate them directly (no 'window.' prefix)
+        dataService = new DataService();
+        aiService = new AIService();
+        uiService = new UIService();
         
-        // Initialize AI service
-        aiService.initializeGemini();
-        
-        // Set up UI callbacks
-        uiService.setOnSendMessageCallback(handleSendMessage);
-        uiService.setOnClearConversationCallback(handleClearConversation);
-        uiService.setOnDataSourceToggleCallback(() => uiService.handleDataSourceToggle());
-        
-        // Initialize UI
-        uiService.setupEventListeners();
-        uiService.showWelcomeMessage();
-        uiService.updateStatus('Ready to analyze your Excel data');
-        
+        // ... rest of initialization ...
     } catch (error) {
         console.error('Error initializing services:', error);
         if (uiService) {

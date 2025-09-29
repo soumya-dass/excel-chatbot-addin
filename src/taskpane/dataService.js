@@ -1,7 +1,7 @@
 /* global Excel */
 
 // DataService - Handles Excel data reading and financial table structure analysis
-class DataService {
+export class DataService {
     constructor() {
         this.CONFIG = {
             MAX_ROWS: 200,
@@ -259,7 +259,3 @@ class DataService {
     }
 }
 
-// Export for use in other modules
-if (typeof window !== 'undefined') {
-    window.DataService = DataService;
-}

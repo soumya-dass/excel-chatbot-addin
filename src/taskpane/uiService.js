@@ -1,8 +1,9 @@
 // Import Markdown parser
 import { marked } from 'marked';
+// uiService.js
 
 // UIService - Handles all user interface interactions and DOM manipulation
-class UIService {
+export class UIService {
     constructor() {
         this.setupMarkdown();
         this.onSendMessageCallback = null;
@@ -258,7 +259,3 @@ class UIService {
     }
 }
 
-// Export for use in other modules
-if (typeof window !== 'undefined') {
-    window.UIService = UIService;
-}
